@@ -1,8 +1,6 @@
 package PageObject_Model;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -12,27 +10,31 @@ public class PastebinTest {
 
     private WebDriver driver;
 
-    @BeforeMethod (alwaysRun = true)
+    @BeforeMethod(alwaysRun = true)
     public void browserSetup() {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
     }
 
-    @Test (description = "First lonely test")
-    public void CreateNewPaste() {
+    @Test(description = "First lonely test")
+    public void createNewPaste() {
+        String pasteContent = "git config --global user.name  \"New Sheriff in Town\"\n" +
+                "git reset $(git commit-tree HEAD^{tree} -m \"Legacy code\")\n" +
+                "git push origin master --force";
 
-        String pasteContent = "Hello from WebDriver";
-        String pasteTitle = "helloweb";
+        String pasteTitle = "how to gain dominance among developers";
+        String syntaxBash = "Bash";
 
         PastebinHomePage pastebinPage = new PastebinHomePage(driver)
                 .openPage()
                 .writeCode(pasteContent, pasteTitle);
 
-        boolean isPasteCreated = pastebinPage.verifySucceed(pasteTitle);
+        boolean browserPageTitleMatches = pastebinPage.verifyTitle(pasteTitle);
+        boolean syntaxSuspended = pastebinPage.verifySyntax(syntaxBash);
+        boolean textMatches = pastebinPage.verifyText(pasteContent);
 
-        Assert.assertTrue(isPasteCreated, "The paste was not created Succesfully");
-
+        Assert.assertTrue(browserPageTitleMatches, "Browser title doesn't match");
+        Assert.assertTrue(syntaxSuspended, "Syntax is not set to Bash");
+        Assert.assertTrue(textMatches, "Text does not match");
     }
-
-
 }

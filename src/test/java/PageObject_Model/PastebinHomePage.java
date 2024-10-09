@@ -1,20 +1,15 @@
 package PageObject_Model;
-
 import Waits.CustomConditions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import java.time.Duration;
-import java.util.List;
-import static java.lang.System.out;
-
 public class PastebinHomePage extends AbstractPage {
-
     private static final String HOMEPAGE_URL = "https://pastebin.com";
 
     @FindBy(id = "postform-text")
@@ -26,46 +21,63 @@ public class PastebinHomePage extends AbstractPage {
     @FindBy(xpath = "//li[text()='10 Minutes']")
     private WebElement tenMins;
 
+    @FindBy(id = "select2-postform-format-container")
+    private WebElement syntaxHighlightingDropdown;
+
+    @FindBy(xpath = "//li[text()='Bash']")
+    private WebElement bashOption;
+
     @FindBy(name = "PostForm[name]")
     private WebElement pasteName;
 
     @FindBy(xpath = "//button[text()='Create New Paste']")
     private WebElement createNewPaste;
 
-    @FindBy(name = "text")
-    private WebElement succeed;
+    @FindBy(css = "a.btn.-small.h_800")
+    private WebElement syntaxLabel;
+
+    @FindBy(xpath = "//textarea[@class='textarea']")
+    private WebElement codeBlock;
 
     protected PastebinHomePage(WebDriver driver) {
         super(driver);
-        PageFactory.initElements(driver, this);
-    }
+        PageFactory.initElements(driver, this);}
 
     public PastebinHomePage openPage() {
         driver.get(HOMEPAGE_URL);
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(CustomConditions
                 .jQueryAJAXsCompleted());
-        return this;
-    }
+        return this;}
 
     public PastebinHomePage writeCode(String code, String pasteName) {
         pasteBox.sendKeys(code);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        // Set expiration to "10 Minutes"
         pasteExpiration.click();
-        wait.until(ExpectedConditions.visibilityOf(tenMins));
-        tenMins.click();
+        wait.until(ExpectedConditions.visibilityOf(tenMins)).click();
+
+        // Set syntax highlighting to "Bash"
+        syntaxHighlightingDropdown.click();
+        wait.until(ExpectedConditions.visibilityOf(bashOption)).click();
+
+        // Set paste name/title
         this.pasteName.sendKeys(pasteName);
 
-        WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait2.until(ExpectedConditions.elementToBeClickable(createNewPaste));
-        createNewPaste.click();
+        // Click "Create New Paste"
+        wait.until(ExpectedConditions.elementToBeClickable(createNewPaste)).click();
         return this;
     }
 
-    public boolean verifySucceed(String pasteName) {
-
-        WebElement pasteHeader = driver.findElement(By.xpath("//h1[text()='" + pasteName + "']"));
-
-        return pasteHeader.isDisplayed();
+    public boolean verifyTitle(String title) {
+        return driver.getTitle().equals(title);
     }
 
+    public boolean verifySyntax(String syntaxBash) {
+        return syntaxLabel.getText().equals(syntaxBash);
+    }
+
+    public boolean verifyText(String pasteText) {
+        return codeBlock.getText().contains(pasteText);
+    }
 }
